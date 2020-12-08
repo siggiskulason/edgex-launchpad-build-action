@@ -14,11 +14,11 @@ inputs:
   access_secret:
     description: "access_secret"
     required: true
-  arm64_build:
-    description: "arm64_build"
+  build1:
+    description: "build1"
     required: true
-  amd64_build:
-    description: "amd64_build"
+  build2:
+    description: "build2"
     required: true
 runs:
   using: composite
@@ -43,12 +43,12 @@ runs:
         snap = launchpad.snaps.getByName(name="${{inputs.edgex_snap}}", owner=edgex_team)
 
         # it's not obvious from the documentation - but we need to specify the channel used for snapcraft, otherwise we get an old version
-        if bool ("${{inputs.amd64_build}}"):
-          amd64 = release.getDistroArchSeries(archtag="amd64")
+        if bool ("${{inputs.build1}}"):
+          amd64 = release.getDistroArchSeries(archtag="${{inputs.build1}}")
           request = snap.requestBuild(archive=ubuntu.main_archive, distro_arch_series=amd64, pocket='Updates', channels={"snapcraft":"edge"})
           print(request)
-        if bool ("${{inputs.arm64_build}}"):
-          arm64 = release.getDistroArchSeries(archtag="arm64")
+        if bool ("${{inputs.build2}}"):
+          arm64 = release.getDistroArchSeries(archtag="${{inputs.build2}}")
           request = snap.requestBuild(archive=ubuntu.main_archive, distro_arch_series=arm64, pocket='Updates', channels={"snapcraft":"edge"})
           print(request)
       shell: python
