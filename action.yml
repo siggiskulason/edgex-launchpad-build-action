@@ -14,6 +14,12 @@ inputs:
   access_secret:
     description: "access_secret"
     required: true
+  arm64_build:
+    description: "arm64_build"
+    required: true
+  amd64_build:
+    description: "amd64_build"
+    required: true
 runs:
   using: composite
   steps:
@@ -33,13 +39,16 @@ runs:
         launchpad = Launchpad.login("${{inputs.consumer_name}}", "${{inputs.access_token}}", "${{inputs.access_secret}}",service_root, version='devel')
         ubuntu = launchpad.distributions["ubuntu"]
         release = ubuntu.getSeries(name_or_version="bionic")
-        amd64 = release.getDistroArchSeries(archtag="amd64")
-        arm64 = release.getDistroArchSeries(archtag="arm64")
         edgex_team = launchpad.people["canonical-edgex"]
         snap = launchpad.snaps.getByName(name="${{inputs.edgex_snap}}", owner=edgex_team)
+
         # it's not obvious from the documentation - but we need to specify the channel used for snapcraft, otherwise we get an old version
-        request = snap.requestBuild(archive=ubuntu.main_archive, distro_arch_series=amd64, pocket='Updates', channels={"snapcraft":"edge"})
-        print(request)
-        request = snap.requestBuild(archive=ubuntu.main_archive, distro_arch_series=arm64, pocket='Updates', channels={"snapcraft":"edge"})
-        print(request)
+        if bool ("${{inputs.amd64_build}}"):
+          amd64 = release.getDistroArchSeries(archtag="amd64")
+          request = snap.requestBuild(archive=ubuntu.main_archive, distro_arch_series=amd64, pocket='Updates', channels={"snapcraft":"edge"})
+          print(request)
+        if bool ("${{inputs.arm64_build}}"):
+          arm64 = release.getDistroArchSeries(archtag="arm64")
+          request = snap.requestBuild(archive=ubuntu.main_archive, distro_arch_series=arm64, pocket='Updates', channels={"snapcraft":"edge"})
+          print(request)
       shell: python
